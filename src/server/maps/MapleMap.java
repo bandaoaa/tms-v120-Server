@@ -1841,7 +1841,10 @@ public final class MapleMap {
         }
         for (final MaplePet pet : chr.getPets()) {
             if (pet.getSummoned()) {
+                pet.setPos(chr.getPosition());
+                pet.setFh(chr.getFH());
                 broadcastMessage(chr, PetPacket.showPet(chr, pet, false, false), false);
+                chr.getClient().getSession().write(PetPacket.showPet(chr, pet, false, false));
             }
         }
         if (chr.getParty() != null && !chr.isClone()) {
