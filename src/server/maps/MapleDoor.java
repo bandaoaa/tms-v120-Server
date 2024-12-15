@@ -1,34 +1,34 @@
 /*
- This file is part of the OdinMS Maple Story Server
- Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
- Matthias Butz <matze@odinms.de>
- Jan Christian Meyer <vimes@odinms.de>
+This file is part of the OdinMS MapleStory Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc>
+Matthias Butz <matze@odinms.de>
+Jan Christian Meyer <vimes@odinms.de>
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU Affero General Public License version 3
- as published by the Free Software Foundation. You may not use, modify
- or distribute this program under any other version of the
- GNU Affero General Public License.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License version 3
+as published by the Free Software Foundation. You may not use, modify
+or distribute this program under any other version of the
+GNU Affero General Public License.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Affero General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
 
- You should have received a copy of the GNU Affero General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.maps;
 
 import java.awt.Point;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
 import client.MapleCharacter;
 import client.MapleClient;
-import handling.world.MaplePartyCharacter;
-import java.lang.ref.WeakReference;
 import server.MaplePortal;
 import tools.MaplePacketCreator;
 
@@ -114,11 +114,14 @@ public class MapleDoor extends AbstractMapleMapObject {
             return;
         }
         if (target.getId() == client.getPlayer().getMapId() || getOwnerId() == client.getPlayer().getId() || (getOwner() != null && getOwner().getParty() != null && getOwner().getParty().getMemberById(client.getPlayer().getId()) != null)) {
-            client.getSession().write(MaplePacketCreator.spawnDoor(getOwnerId(), town.getId() == client.getPlayer().getMapId() ? townPortal.getPosition() : targetPosition, true));
-            if (getOwner() != null && getOwner().getParty() != null && (getOwnerId() == client.getPlayer().getId() || getOwner().getParty().getMemberById(client.getPlayer().getId()) != null)) {
-                client.getSession().write(MaplePacketCreator.partyPortal(town.getId(), target.getId(), skillId, targetPosition));
+            if (target.getId() == client.getPlayer().getMapId()) {
+                client.getSession().write(MaplePacketCreator.spawnDoor(getOwnerId(), town.getId() == client.getPlayer().getMapId() ? townPortal.getPosition() : targetPosition, true));
+            } else {
+                client.getSession().write(MaplePacketCreator.spawnPortal(town.getId(), target.getId(), skillId, targetPosition));
             }
-            client.getSession().write(MaplePacketCreator.spawnPortal(town.getId(), target.getId(), skillId, targetPosition));
+            //if (getOwner() != null && getOwner().getParty() != null && (getOwnerId() == client.getPlayer().getId() || getOwner().getParty().getMemberById(client.getPlayer().getId()) != null)) {
+            //    client.sendPacket(MapleUserPackets.partyPortal(town.getId(), target.getId(), skillId, targetPosition));
+            //}
         }
     }
 
@@ -129,7 +132,7 @@ public class MapleDoor extends AbstractMapleMapObject {
         }
         if (target.getId() == client.getPlayer().getMapId() || getOwnerId() == client.getPlayer().getId() || (getOwner() != null && getOwner().getParty() != null && getOwner().getParty().getMemberById(client.getPlayer().getId()) != null)) {
             if (getOwner().getParty() != null && (getOwnerId() == client.getPlayer().getId() || getOwner().getParty().getMemberById(client.getPlayer().getId()) != null)) {
-                client.getSession().write(MaplePacketCreator.partyPortal(999999999, 999999999, 0, new Point(-1, -1)));
+                //client.sendPacket(MapleUserPackets.partyPortal(999999999, 999999999, 0, new Point(-1, -1)));
             }
             client.getSession().write(MaplePacketCreator.removeDoor(getOwnerId(), false));
             client.getSession().write(MaplePacketCreator.removeDoor(getOwnerId(), true));
@@ -138,6 +141,8 @@ public class MapleDoor extends AbstractMapleMapObject {
 
     public final void warp(final MapleCharacter chr, final boolean toTown) {
         if (chr.getId() == getOwnerId() || (getOwner() != null && getOwner().getParty() != null && getOwner().getParty().getMemberById(chr.getId()) != null)) {
+            chr.getClient().getSession().write(MaplePacketCreator.showOwnBuffEffect(skillId, 7));
+            
             if (!toTown) {
                 chr.changeMap(target, targetPosition);
             } else {
