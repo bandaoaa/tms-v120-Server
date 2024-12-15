@@ -91,7 +91,7 @@ public class ChannelServer implements Serializable {
     private final Map<MapleEventType, MapleEvent> events = new EnumMap<MapleEventType, MapleEvent>(MapleEventType.class);
     private boolean debugMode = false;
 
-    private ChannelServer(final String key, final int channel) {
+    private ChannelServer(final int channel) {
         this.key = key;
         this.channel = channel;
         mapFactory = new MapleMapFactory();
@@ -199,8 +199,8 @@ public class ChannelServer implements Serializable {
         return mapFactory;
     }
 
-    public static final ChannelServer newInstance(final String key, final int channel) {
-        return new ChannelServer(key, channel);
+    public static final ChannelServer newInstance(final int channel) {
+        return new ChannelServer(channel);
     }
 
     public static final ChannelServer getInstance(final int channel) {
@@ -253,7 +253,7 @@ public class ChannelServer implements Serializable {
     public final int getExpRate() {
         return expRate;
     }
-    
+
     public final void setExpRate(final int expRate) {
         this.expRate = expRate;
     }
@@ -321,16 +321,15 @@ public class ChannelServer implements Serializable {
         serverStartTime = System.currentTimeMillis();
 
         for (int i = 0; i < Integer.parseInt(ServerProperties.getProperty("tms.Count", "0")); i++) {
-            newInstance(ServerConstants.Channel_Key[i], i + 1).run_startup_configurations();
+            newInstance(i + 1).run_startup_configurations();
         }
     }
-    
-    public static final void startChannel(final int channel) 
-    {
+
+    public static final void startChannel(final int channel) {
         serverStartTime = System.currentTimeMillis();
         for (int i = 0; i < Integer.parseInt(ServerProperties.getProperty("tms.Count", "0")); i++) {
-            if(channel == i + 1) {
-                newInstance(ServerConstants.Channel_Key[i], i + 1).run_startup_configurations();
+            if (channel == i + 1) {
+                newInstance(i + 1).run_startup_configurations();
                 break;
             }
         }
@@ -556,14 +555,13 @@ public class ChannelServer implements Serializable {
         broadcastGMPacket(new ByteArrayMaplePacket(message));
     }
 
-
-   public void saveAll() {
-    int ppl = 0;
-    for (Iterator i$ = this.players.getAllCharacters().iterator(); i$.hasNext(); ) { MapleCharacter chr = (MapleCharacter)i$.next();
-      ++ppl;
-      chr.saveToDB(false, false);
+    public void saveAll() {
+        int ppl = 0;
+        for (Iterator i$ = this.players.getAllCharacters().iterator(); i$.hasNext();) {
+            MapleCharacter chr = (MapleCharacter) i$.next();
+            ++ppl;
+            chr.saveToDB(false, false);
+        }
+        System.out.println("[自動存檔] 已經將頻道 " + this.channel + " 的 " + ppl + " 個玩家保存到數據中.");
     }
-    System.out.println("[自動存檔] 已經將頻道 " + this.channel + " 的 " + ppl + " 個玩家保存到數據中.");
-  }
- }
-
+}
