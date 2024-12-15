@@ -2307,7 +2307,7 @@ public class MapleCharacter extends AbstractAnimatedMapleMapObject implements Se
     }
 
     public void changeMap(final MapleMap to, final Point pos) {
-        changeMapInternal(to, pos, MaplePacketCreator.getWarpToMap(to, 0x81, this), null);
+        changeMapInternal(to, pos, MaplePacketCreator.getWarpToMap(to, 128, this), null);
     }
 
     public void changeMap(final MapleMap to, final MaplePortal pto) {
