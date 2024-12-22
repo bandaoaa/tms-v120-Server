@@ -4955,7 +4955,7 @@ public class MapleCharacter extends AbstractAnimatedMapleMapObject implements Se
                             Collections.swap(pets, count, pet_count);
                         }
 
-                        if (broadcast) {
+                        if (getMap() != null) {
                             getMap().broadcastMessage(this, PetPacket.showPet(this, pet, false, false), true);
                             client.getSession().write(PetPacket.PetComplete(this, pet));
                             //final List<Pair<MapleStat, Integer>> stats = new ArrayList<Pair<MapleStat, Integer>>(1);
